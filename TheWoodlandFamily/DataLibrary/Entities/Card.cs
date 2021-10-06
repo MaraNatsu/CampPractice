@@ -8,7 +8,7 @@ namespace EFDataAccessLibrary.Entities
     {
         public int Id { get; set; }
         public int DeckId { get; set; }
-        public int Order { get; set; }
+        public byte Order { get; set; }
         public string Type { get; set; }
     }
 }

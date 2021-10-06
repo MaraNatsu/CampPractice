@@ -1,4 +1,5 @@
 ﻿using EFDataAccessLibrary.DataAccess;
+using EFDataAccessLibrary.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -7,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using TheWoodlandFamily.Models;
+using TheWoodlandFamily.ViewModels;
 
 namespace TheWoodlandFamily.Controllers
 {
@@ -18,6 +20,29 @@ namespace TheWoodlandFamily.Controllers
         public HomeController(GameContext context)
         {
             db = context;
+        }
+
+        public RoomViewModel CreateRoom(string playerName, string wordKey, byte playerNumber)
+        {
+            Player firstPlayer = new Player
+            {
+                Name = playerName,
+                Turn = 1,
+                HealthCount = 1
+            };
+            db.Players.Add(firstPlayer);
+
+            Room room = new Room
+            {
+                WordKey = wordKey,
+                PlayerNumber = playerNumber
+            };
+            room.Players.Add(firstPlayer);
+            db.Rooms.Add(room);
+
+            RoomViewModel roomViewModel = new RoomViewModel(room, firstPlayer);
+
+            return roomViewModel;
         }
 
         //[HttpGet]   // GET /api/test2
