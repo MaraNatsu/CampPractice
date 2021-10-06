@@ -8,10 +8,20 @@ namespace EFDataAccessLibrary.Entities
     public class Player
     {
         public int Id { get; set; }
+
+        [Required]
         public int RoomId { get; set; }
+
+        [Required]
         public string Name { get; set; }
+
+        [Required]
         public string State { get; set; }
+
+        [Required]
         public byte Turn { get; set; }
+
+        [Required]
         public byte HealthCount { get; set; }
     }
 }

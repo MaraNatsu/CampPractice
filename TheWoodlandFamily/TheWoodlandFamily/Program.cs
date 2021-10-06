@@ -26,7 +26,7 @@ namespace TheWoodlandFamily
             // create configuration
             var config = builder.Build();
             // get connection line
-            string connectionString = config.GetConnectionString("DefaultConnection");
+            string connectionString = config.GetConnectionString("Default");
 
             var optionsBuilder = new DbContextOptionsBuilder<GameContext>();
             var options = optionsBuilder
