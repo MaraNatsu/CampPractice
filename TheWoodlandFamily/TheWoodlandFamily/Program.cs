@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
-using TheWoodlandFamily.Entities;
+using EFDataAccessLibrary.DataAccess;
 
 namespace TheWoodlandFamily
 {
@@ -28,20 +28,11 @@ namespace TheWoodlandFamily
             // get connection line
             string connectionString = config.GetConnectionString("DefaultConnection");
 
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<GameContext>();
             var options = optionsBuilder
                 .UseSqlServer(connectionString)
                 .Options;
 
-            using (ApplicationContext db = new ApplicationContext(options))
-            {
-                var players = db.Players.ToList();
-                foreach (Player p in players)
-                {
-                    Console.WriteLine($"{p.Id}.{p.RoomId} - {p.Name}");
-                }
-            }
-            Console.Read();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

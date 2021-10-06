@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
-using TheWoodlandFamily.Entities;
+using EFDataAccessLibrary.DataAccess;
 
 namespace TheWoodlandFamily
 {
@@ -23,12 +23,10 @@ namespace TheWoodlandFamily
         {
             services.AddControllers();
 
-            // Get a connection link from the configuration file
-            string connection = Configuration.GetConnectionString("DefaultConnection");
-            // Add MobileContext to the app as a service
-            services.AddDbContext<ApplicationContext>(options =>
-                options.UseSqlServer(connection));
-            services.AddControllersWithViews();
+            services.AddDbContext<GameContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("Default"));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

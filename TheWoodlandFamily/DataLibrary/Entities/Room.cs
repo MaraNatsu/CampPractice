@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 
-namespace TheWoodlandFamily.Entities
+namespace EFDataAccessLibrary.Entities
 {
     public class Room
     {
         public int Id { get; set; }
         public string WordKey { get; set; }
         public int PlayerNumber { get; set; }
+        public List<Player> Players { get; set; } = new List<Player>();
+        public List<Card> Deck { get; set; } = new List<Card>();
     }
 }
