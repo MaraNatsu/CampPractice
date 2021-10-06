@@ -45,6 +45,23 @@ namespace TheWoodlandFamily.Controllers
             return roomViewModel;
         }
 
+        public RoomViewModel JoinRoom(string playerName, string wordKey)
+        {
+            Room room = db.Rooms.Find(wordKey);
+
+            Player player = new Player
+            {
+                Name = playerName,
+                Turn = (byte)(room.Players.Count() + 1),
+                HealthCount = 1
+            };
+            db.Players.Add(player);
+
+            RoomViewModel roomViewModel = new RoomViewModel(room, player);
+
+            return roomViewModel;
+        }
+
         //[HttpGet]   // GET /api/test2
         //public IActionResult ListProducts()
         //{

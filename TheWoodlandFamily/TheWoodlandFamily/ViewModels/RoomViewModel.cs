@@ -11,14 +11,14 @@ namespace TheWoodlandFamily.ViewModels
         int RoomId { get; set; }
         int PlayerId { get; set; }
         byte HealthCount { get; set; }
-        byte FirstPlayerTurn { get; set; }
+        byte PlayerTurn { get; set; }
 
-        public RoomViewModel(Room room, Player firstPlayer)
+        public RoomViewModel(Room room, Player player)
         {
             this.RoomId = room.Id;
-            this.PlayerId = firstPlayer.Id;
-            this.HealthCount = firstPlayer.HealthCount;
-            this.FirstPlayerTurn = firstPlayer.Turn;
+            this.PlayerId = player.Id;
+            this.HealthCount = player.HealthCount;
+            this.PlayerTurn = player.Turn;
         }
     }
 }
