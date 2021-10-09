@@ -18,20 +18,20 @@ namespace TheWoodlandFamily
         {
             //CreateHostBuilder(args).Build().Run();
 
-            var builder = new ConfigurationBuilder();
-            // path to current catalogue
-            builder.SetBasePath(Directory.GetCurrentDirectory());
-            // get confuguration from appsettings.json
-            builder.AddJsonFile("appsettings.json");
-            // create configuration
-            var config = builder.Build();
-            // get connection line
-            string connectionString = config.GetConnectionString("Default");
+            //var builder = new ConfigurationBuilder();
+            //// path to current catalogue
+            //builder.SetBasePath(Directory.GetCurrentDirectory());
+            //// get confuguration from appsettings.json
+            //builder.AddJsonFile("appsettings.json");
+            //// create configuration
+            //var config = builder.Build();
+            //// get connection line
+            //string connectionString = config.GetConnectionString("Default");
 
-            var optionsBuilder = new DbContextOptionsBuilder<GameContext>();
-            var options = optionsBuilder
-                .UseSqlServer(connectionString)
-                .Options;
+            //var optionsBuilder = new DbContextOptionsBuilder<GameContext>();
+            //var options = optionsBuilder
+            //    .UseSqlServer(connectionString)
+            //    .Options;
 
         }
 

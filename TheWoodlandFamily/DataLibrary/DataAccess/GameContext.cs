@@ -13,9 +13,10 @@ namespace EFDataAccessLibrary.DataAccess
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Card> Deck { get; set; }
 
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Data Source=NOTEBOOK-HOME-A;Initial Catalog=EFDemoDB;Integrated Security=True;");
+            optionsBuilder.UseSqlServer("Default");
         }
     }
 }

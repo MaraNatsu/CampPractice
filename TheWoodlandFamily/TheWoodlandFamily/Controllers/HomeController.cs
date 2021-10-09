@@ -22,44 +22,58 @@ namespace TheWoodlandFamily.Controllers
             db = context;
         }
 
+        [HttpPost]
         public RoomViewModel CreateRoom(string playerName, string wordKey, byte playerNumber)
         {
-            Player firstPlayer = new Player
+            var inspector = db.Rooms.FirstOrDefault(room => room.WordKey.Equals(wordKey));
+
+            if (inspector == null)
             {
-                Name = playerName,
-                Turn = 1,
-                HealthCount = 1
-            };
-            db.Players.Add(firstPlayer);
+                Player firstPlayer = new Player
+                {
+                    Name = playerName,
+                    Turn = 1,
+                    HealthCount = 1
+                };
+                db.Players.Add(firstPlayer);
 
-            Room room = new Room
-            {
-                WordKey = wordKey,
-                PlayerNumber = playerNumber
-            };
-            room.Players.Add(firstPlayer);
-            db.Rooms.Add(room);
+                Room room = new Room
+                {
+                    WordKey = wordKey,
+                    PlayerNumber = playerNumber
+                };
+                room.Players.Add(firstPlayer);
+                db.Rooms.Add(room);
 
-            RoomViewModel roomViewModel = new RoomViewModel(room, firstPlayer);
+                RoomViewModel roomViewModel = new RoomViewModel(room, firstPlayer);
 
-            return roomViewModel;
+                return roomViewModel;
+            }
+            return null;
         }
 
+        [HttpPost]
         public RoomViewModel JoinRoom(string playerName, string wordKey)
         {
-            Room room = db.Rooms.Find(wordKey);
+            Room room = db.Rooms.FirstOrDefault(room => room.WordKey.Equals(wordKey));
 
-            Player player = new Player
+            if (room != null)
             {
-                Name = playerName,
-                Turn = (byte)(room.Players.Count() + 1),
-                HealthCount = 1
-            };
-            db.Players.Add(player);
+                Player previousPlayer = room.Players[room.Players.Count() - 1];
 
-            RoomViewModel roomViewModel = new RoomViewModel(room, player);
+                Player player = new Player
+                {
+                    Name = playerName,
+                    Turn = (byte)(previousPlayer.Turn + 1),
+                    HealthCount = 1
+                };
+                db.Players.Add(player);
 
-            return roomViewModel;
+                RoomViewModel roomViewModel = new RoomViewModel(room, player);
+
+                return roomViewModel;
+            }
+            return null;
         }
 
         //[HttpGet]   // GET /api/test2
