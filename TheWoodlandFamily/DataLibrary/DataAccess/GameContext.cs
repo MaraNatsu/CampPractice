@@ -16,7 +16,7 @@ namespace EFDataAccessLibrary.DataAccess
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Default");
+
         }
     }
 }

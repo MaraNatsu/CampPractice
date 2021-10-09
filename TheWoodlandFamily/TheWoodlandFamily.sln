@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheWoodlandFamily", "TheWoodlandFamily\TheWoodlandFamily.csproj", "{8B7FAC2F-D7A9-40C8-A751-F8314F59C1BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFDataAccessLibrary", "DataLibrary\EFDataAccessLibrary.csproj", "{45EDDBCA-8F9B-4311-8861-A70C97546880}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EFDataAccessLibrary", "DataLibrary\EFDataAccessLibrary.csproj", "{45EDDBCA-8F9B-4311-8861-A70C97546880}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -4,16 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TheWoodlandFamily.ViewModels
+namespace TheWoodlandFamily.OutputModels
 {
-    public class RoomViewModel
+    public class RoomOutputModel
     {
-        int RoomId { get; set; }
-        int PlayerId { get; set; }
-        byte HealthCount { get; set; }
-        byte PlayerTurn { get; set; }
+        public int RoomId { get; set; }
+        public int PlayerId { get; set; }
+        public byte HealthCount { get; set; }
+        public byte PlayerTurn { get; set; }
 
-        public RoomViewModel(Room room, Player player)
+        public RoomOutputModel(Room room, Player player)
         {
             this.RoomId = room.Id;
             this.PlayerId = player.Id;
