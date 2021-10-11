@@ -1,6 +1,8 @@
-﻿using EFDataAccessLibrary.DataAccess;
+﻿using EFDataAccessLibrary;
+using EFDataAccessLibrary.DataAccess;
 using EFDataAccessLibrary.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -17,40 +19,41 @@ namespace TheWoodlandFamily.Controllers
     [Route("api/[controller]")]
     public class HomeController : ControllerBase
     {
-        private GameContext db;
+        private GameContext dbContext;
         public HomeController(GameContext context)
         {
-            db = context;
+            dbContext = context;
         }
 
         [HttpPost("create-room")]
         public async Task<RoomOutputModel> CreateRoom([FromBody] RoomCreationInputModel creatorData)
         {
-            var inspector = db.Rooms.FirstOrDefault(room => room.WordKey.Equals(creatorData.WordKey));
+            var inspector = dbContext.Rooms.FirstOrDefault(room => room.WordKey.Equals(creatorData.WordKey));
 
             if (inspector != null)
             {
                 return null;
             }
 
-            Player firstPlayer = new Player
-            {
-                Name = creatorData.PlayerName,
-                Turn = 1,
-                HealthCount = 1
-            };
-            db.Players.Add(firstPlayer);
-
             Room room = new Room
             {
                 WordKey = creatorData.WordKey,
                 PlayerNumber = creatorData.PlayerNumber
             };
-            room.Players.Add(firstPlayer);
-            db.Rooms.Add(room);
+            dbContext.Rooms.Add(room);
 
+            Player firstPlayer = new Player
+            {
+                RoomId = room.Id,
+                Name = creatorData.PlayerName,
+                State = PlayerState.Waiting.ToString(),
+                Turn = 1,
+                HealthCount = 1
+            };
+            dbContext.Players.Add(firstPlayer);
+
+            await dbContext.SaveChangesAsync();
             RoomOutputModel roomViewModel = new RoomOutputModel(room, firstPlayer);
-            await db.SaveChangesAsync();
 
             return roomViewModel;
         }
@@ -58,25 +61,27 @@ namespace TheWoodlandFamily.Controllers
         [HttpPost("join-room")]
         public async Task<RoomOutputModel> JoinRoom([FromBody] RoomJoiningInputModel playerData)
         {
-            Room room = db.Rooms.FirstOrDefault(room => room.WordKey.Equals(playerData.WordKey));
+            Room room = dbContext.Rooms.Include(room => room.Players).FirstOrDefault(room => room.WordKey.Equals(playerData.WordKey));
 
             if (room == null)
             {
                 return null;
             }
 
-            Player previousPlayer = room.Players[room.Players.Count() - 1];
+            byte previousPlayerTurn = dbContext.Players.Max(player => player.Turn);
 
             Player player = new Player
             {
+                RoomId = room.Id,
                 Name = playerData.PlayerName,
-                Turn = (byte)(previousPlayer.Turn + 1),
+                State = PlayerState.Waiting.ToString(),
+                Turn = (byte)(previousPlayerTurn + 1),
                 HealthCount = 1
             };
-            db.Players.Add(player);
+            dbContext.Players.Add(player);
 
+            await dbContext.SaveChangesAsync();
             RoomOutputModel roomViewModel = new RoomOutputModel(room, player);
-            await db.SaveChangesAsync();
 
             return roomViewModel;
         }

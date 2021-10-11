@@ -13,6 +13,7 @@ namespace EFDataAccessLibrary.Entities
         public int RoomId { get; set; }
 
         [Required]
+        [MaxLength(10)]
         public string Name { get; set; }
 
         [Required]

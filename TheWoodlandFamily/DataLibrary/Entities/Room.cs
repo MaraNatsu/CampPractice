@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace EFDataAccessLibrary.Entities
@@ -10,6 +11,8 @@ namespace EFDataAccessLibrary.Entities
         public int Id { get; set; }
 
         [Required]
+        [MinLength(4)]
+        [MaxLength(8)]
         public string WordKey { get; set; }
 
         [Required]
