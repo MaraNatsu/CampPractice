@@ -41,6 +41,7 @@ namespace TheWoodlandFamily.Controllers
                 PlayerNumber = creatorData.PlayerNumber
             };
             dbContext.Rooms.Add(room);
+            await dbContext.SaveChangesAsync();
 
             Player firstPlayer = new Player
             {
