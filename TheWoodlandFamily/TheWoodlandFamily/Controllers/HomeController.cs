@@ -41,7 +41,6 @@ namespace TheWoodlandFamily.Controllers
                 PlayerNumber = creatorData.PlayerNumber
             };
             dbContext.Rooms.Add(room);
-            await dbContext.SaveChangesAsync();
 
             Player firstPlayer = new Player
             {
@@ -49,7 +48,8 @@ namespace TheWoodlandFamily.Controllers
                 Name = creatorData.PlayerName,
                 State = PlayerState.Waiting.ToString(),
                 Turn = 1,
-                HealthCount = 1
+                HealthCount = 1,
+                Room = room
             };
             dbContext.Players.Add(firstPlayer);
 

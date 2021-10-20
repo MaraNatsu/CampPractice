@@ -24,5 +24,7 @@ namespace EFDataAccessLibrary.Entities
 
         [Required]
         public byte HealthCount { get; set; }
+
+        public Room Room { get; set; }
     }
 }
