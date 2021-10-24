@@ -8,6 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using EFDataAccessLibrary.DataAccess;
 using Microsoft.AspNetCore.Http;
 using TheWoodlandFamily.Hubs;
+using FluentValidation.AspNetCore;
+using FluentValidation;
+using EFDataAccessLibrary.Entities;
+using TheWoodlandFamily.Validators;
 
 namespace TheWoodlandFamily
 {
@@ -29,6 +33,10 @@ namespace TheWoodlandFamily
             {
                 options.UseSqlServer(Configuration.GetConnectionString("Default"));
             });
+
+            services.AddMvc().AddFluentValidation();
+            services.AddTransient<IValidator<Player>, PlayerValidator>();
+            services.AddTransient<IValidator<Room>, RoomValidator>();
 
             services.AddSignalR();
         }
