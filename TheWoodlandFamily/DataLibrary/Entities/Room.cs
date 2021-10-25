@@ -16,6 +16,8 @@ namespace EFDataAccessLibrary.Entities
         public string WordKey { get; set; }
 
         [Required]
+        [MinLength(2)]
+        [MaxLength(5)]
         public byte PlayerNumber { get; set; }
 
         [Required]

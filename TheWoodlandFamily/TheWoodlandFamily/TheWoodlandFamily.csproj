@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataLibrary\EFDataAccessLibrary.csproj" />
+    <ProjectReference Include="..\ValidationLibrary\ValidationLibrary.csproj" />
   </ItemGroup>
 
   <ItemGroup>

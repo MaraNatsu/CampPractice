@@ -11,7 +11,8 @@ using TheWoodlandFamily.Hubs;
 using FluentValidation.AspNetCore;
 using FluentValidation;
 using EFDataAccessLibrary.Entities;
-using TheWoodlandFamily.Validators;
+using ValidationLibrary;
+using ValidationLibrary.Validators;
 
 namespace TheWoodlandFamily
 {
