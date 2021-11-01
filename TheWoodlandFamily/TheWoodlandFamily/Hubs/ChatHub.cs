@@ -8,9 +8,20 @@ namespace TheWoodlandFamily.Hubs
 {
     public class ChatHub : Hub
     {
-        public async Task Send(string message)
+        public override Task OnConnectedAsync()
         {
-            await Clients.All.SendAsync("Send", message);
+            Console.WriteLine("Connected");
+            return base.OnConnectedAsync();
+        }
+
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            return base.OnDisconnectedAsync(exception);
+        }
+
+        public async Task SendMessage(string player, string message)
+        {
+            await Clients.All.SendAsync("ReceiveMessage", player, message);
         }
     }
 }

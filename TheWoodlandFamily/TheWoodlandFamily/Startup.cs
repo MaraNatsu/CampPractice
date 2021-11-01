@@ -35,6 +35,8 @@ namespace TheWoodlandFamily
                 options.UseSqlServer(Configuration.GetConnectionString("Default"));
             });
 
+            services.AddCors();
+
             services.AddMvc().AddFluentValidation();
             services.AddTransient<IValidator<Player>, PlayerValidator>();
             services.AddTransient<IValidator<Room>, RoomValidator>();
@@ -53,6 +55,13 @@ namespace TheWoodlandFamily
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            // global cors policy
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true) // allow any origin
+                .AllowCredentials()); // allow credentials
 
             app.UseAuthorization();
 
