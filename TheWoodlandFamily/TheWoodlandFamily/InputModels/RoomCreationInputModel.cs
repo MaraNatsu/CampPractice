@@ -7,7 +7,7 @@ namespace TheWoodlandFamily.InputModels
 {
     public class RoomCreationInputModel
     {
-        public string PlayerName { get; set; }
+        //public string PlayerName { get; set; }
         public string WordKey { get; set; }
         public byte PlayerNumber { get; set; }
     }

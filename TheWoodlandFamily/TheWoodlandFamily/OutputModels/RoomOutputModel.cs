@@ -9,16 +9,10 @@ namespace TheWoodlandFamily.OutputModels
     public class RoomOutputModel
     {
         public int RoomId { get; set; }
-        public int PlayerId { get; set; }
-        public byte HealthCount { get; set; }
-        public byte PlayerTurn { get; set; }
 
-        public RoomOutputModel(Room room, Player player)
+        public RoomOutputModel(Room room)
         {
-            this.RoomId = room.Id;
-            this.PlayerId = player.Id;
-            this.HealthCount = player.HealthCount;
-            this.PlayerTurn = player.Turn;
+            RoomId = room.Id;
         }
     }
 }

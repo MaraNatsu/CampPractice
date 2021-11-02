@@ -19,16 +19,17 @@ namespace TheWoodlandFamily.Controllers
     [Route("api/[controller]")]
     public class HomeController : ControllerBase
     {
-        private GameContext dbContext;
+        public GameContext _dbContext { get; }
+
         public HomeController(GameContext context)
         {
-            dbContext = context;
+            _dbContext = context;
         }
 
         [HttpPost("create-room")]
-        public async Task<RoomOutputModel> CreateRoom([FromBody] RoomCreationInputModel creatorData)
+        public async Task<RoomOutputModel> CreateRoom([FromBody] RoomCreationInputModel roomData)
         {
-            var inspector = dbContext.Rooms.FirstOrDefault(room => room.WordKey.Equals(creatorData.WordKey));
+            Room inspector = _dbContext.Rooms.FirstOrDefault(room => room.WordKey.Equals(roomData.WordKey));
 
             if (inspector != null)
             {
@@ -37,54 +38,54 @@ namespace TheWoodlandFamily.Controllers
 
             Room room = new Room
             {
-                WordKey = creatorData.WordKey,
-                PlayerNumber = creatorData.PlayerNumber
+                WordKey = roomData.WordKey,
+                PlayerNumber = roomData.PlayerNumber
             };
-            dbContext.Rooms.Add(room);
+            _dbContext.Rooms.Add(room);
 
-            Player firstPlayer = new Player
-            {
-                RoomId = room.Id,
-                Name = creatorData.PlayerName,
-                State = PlayerState.Waiting.ToString(),
-                Turn = 1,
-                HealthCount = 1,
-                Room = room
-            };
-            dbContext.Players.Add(firstPlayer);
+            //Player firstPlayer = new Player
+            //{
+            //    RoomId = room.Id,
+            //    Name = creatorData.PlayerName,
+            //    State = PlayerState.Waiting.ToString(),
+            //    Turn = 1,
+            //    HealthCount = 1,
+            //    Room = room
+            //};
+            //dbContext.Players.Add(firstPlayer);
 
-            await dbContext.SaveChangesAsync();
-            RoomOutputModel roomViewModel = new RoomOutputModel(room, firstPlayer);
+            await _dbContext.SaveChangesAsync();
+            RoomOutputModel roomViewModel = new RoomOutputModel(room);
 
             return roomViewModel;
         }
 
-        [HttpPost("join-room")]
-        public async Task<RoomOutputModel> JoinRoom([FromBody] RoomJoiningInputModel playerData)
-        {
-            Room room = dbContext.Rooms.Include(room => room.Players).FirstOrDefault(room => room.WordKey.Equals(playerData.WordKey));
+        //[HttpPost("join-room")]
+        //public async Task<RoomOutputModel> JoinRoom([FromBody] RoomJoiningInputModel playerData)
+        //{
+        //    Room room = dbContext.Rooms.Include(room => room.Players).FirstOrDefault(room => room.WordKey.Equals(playerData.WordKey));
 
-            if (room == null)
-            {
-                return null;
-            }
+        //    if (room == null)
+        //    {
+        //        return null;
+        //    }
 
-            byte previousPlayerTurn = dbContext.Players.Max(player => player.Turn);
+        //    byte previousPlayerTurn = dbContext.Players.Max(player => player.Turn);
 
-            Player player = new Player
-            {
-                RoomId = room.Id,
-                Name = playerData.PlayerName,
-                State = PlayerState.Waiting.ToString(),
-                Turn = (byte)(previousPlayerTurn + 1),
-                HealthCount = 1
-            };
-            dbContext.Players.Add(player);
+        //    Player player = new Player
+        //    {
+        //        RoomId = room.Id,
+        //        Name = playerData.PlayerName,
+        //        State = PlayerState.Waiting.ToString(),
+        //        Turn = (byte)(previousPlayerTurn + 1),
+        //        HealthCount = 1
+        //    };
+        //    dbContext.Players.Add(player);
 
-            await dbContext.SaveChangesAsync();
-            RoomOutputModel roomViewModel = new RoomOutputModel(room, player);
+        //    await dbContext.SaveChangesAsync();
+        //    RoomOutputModel roomViewModel = new RoomOutputModel(room, player);
 
-            return roomViewModel;
-        }
+        //    return roomViewModel;
+        //}
     }
 }
