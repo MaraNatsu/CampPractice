@@ -12,7 +12,7 @@ using TheWoodlandFamily.OutputModels;
 
 namespace TheWoodlandFamily.Models
 {
-    public class PlayerCreator
+    public class PlayerJoiner
     {
         private HomeController _controller;
 
