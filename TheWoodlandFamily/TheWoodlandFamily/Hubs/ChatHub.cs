@@ -18,6 +18,7 @@ namespace TheWoodlandFamily.Hubs
 
         private PlayerJoiner _playerJoiner;
         private Dictionary<int, string> _playerSockets = new Dictionary<int, string>();
+        private PlayerNumberChecker _checker = new PlayerNumberChecker();
 
         public ChatHub(GameContext context, PlayerJoiner playerJoiner)
         {
@@ -46,11 +47,9 @@ namespace TheWoodlandFamily.Hubs
             PlayerOutputModel joinedPlayer = await _playerJoiner.JoinRoom(playerToJoin); //creates player entity in DB
             await Groups.AddToGroupAsync(Context.ConnectionId, playerToJoin.WordKey);
             _playerSockets.Add(joinedPlayer.PlayerId, Context.ConnectionId);
-            await Clients.Client(Context.ConnectionId).SendAsync("OnPlayerJoined", joinedPlayer);
+            await Clients.Client(Context.ConnectionId).SendAsync("JoinedPlayer", joinedPlayer);
 
-            PlayerNumberChecker checker = new PlayerNumberChecker(playerToJoin.WordKey, _dbContext, _playerSockets);
-
-            if (checker.IsAllPlayersConnected)
+            if (_checker.CheckIfAllPlayersConnected(playerToJoin.WordKey, _dbContext, _playerSockets))
             {
                 await Clients.Group(playerToJoin.WordKey).SendAsync("StartGame");
             }

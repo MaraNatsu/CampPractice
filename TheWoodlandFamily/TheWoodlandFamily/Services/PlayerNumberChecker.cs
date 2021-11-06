@@ -10,34 +10,27 @@ namespace TheWoodlandFamily.Services
 {
     public class PlayerNumberChecker
     {
-        public byte TotalPlayerNumber { get; }
-        public byte JoinedPlayerNumber { get; }
-        public bool IsAllPlayersConnected { get; }
+        public byte TotalPlayerNumber { get; private set; }
+        public byte JoinedPlayerNumber { get; private set; }
 
-        private string _wordKey;
-        private GameContext _dbContext;
-        private Dictionary<int, string> _playerSockets;
 
-        public PlayerNumberChecker(string wordKey, GameContext dbContext, Dictionary<int, string> playerSockets)
+        public bool CheckIfAllPlayersConnected(string wordKey, GameContext dbContext, Dictionary<int, string> playerSockets)
         {
-            _wordKey = wordKey;
-            _dbContext = dbContext;
-            _playerSockets = playerSockets;
+            TotalPlayerNumber = DefineTotalPlayerNumber(dbContext, wordKey);
+            JoinedPlayerNumber = DefineConnectedPlayers(dbContext, wordKey, playerSockets);
 
-            TotalPlayerNumber = DefineTotalPlayerNumber();
-            JoinedPlayerNumber = DefineConnectedPlayers();
-            IsAllPlayersConnected = CheckIfAllPlayersConnected();
+            return TotalPlayerNumber == JoinedPlayerNumber;
         }
 
-        private byte DefineTotalPlayerNumber()
+        private byte DefineTotalPlayerNumber(GameContext dbContext, string wordKey)
         {
-            Room room = _dbContext.Rooms.FirstOrDefault(room => room.WordKey.Equals(_wordKey));
+            Room room = dbContext.Rooms.FirstOrDefault(room => room.WordKey.Equals(wordKey));
             return room.PlayerNumber;
         }
 
-        private byte DefineConnectedPlayers()
+        private byte DefineConnectedPlayers(GameContext dbContext, string wordKey, Dictionary<int, string> playerSockets)
         {
-            Room room = _dbContext.Rooms.FirstOrDefault(room => room.WordKey.Equals(_wordKey));
+            Room room = dbContext.Rooms.FirstOrDefault(room => room.WordKey.Equals(wordKey));
 
             int[] playerIds = new int[TotalPlayerNumber];
 
@@ -48,7 +41,7 @@ namespace TheWoodlandFamily.Services
 
             byte connectedPlayers = 0;
 
-            foreach (var player in _playerSockets)
+            foreach (var player in playerSockets)
             {
                 if (player.Key.Equals(playerIds))
                 {
@@ -57,16 +50,6 @@ namespace TheWoodlandFamily.Services
             }
 
             return connectedPlayers;
-        }
-
-        private bool CheckIfAllPlayersConnected()
-        {
-            if (TotalPlayerNumber == JoinedPlayerNumber)
-            {
-                return true;
-            }
-
-            return false;
         }
     }
 }
