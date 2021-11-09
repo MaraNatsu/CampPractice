@@ -1,18 +1,16 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using EFDataAccessLibrary.DataAccess;
-using Microsoft.AspNetCore.Http;
 using TheWoodlandFamily.Hubs;
 using FluentValidation.AspNetCore;
 using FluentValidation;
 using EFDataAccessLibrary.Entities;
-using ValidationLibrary;
 using ValidationLibrary.Validators;
+using TheWoodlandFamily.Services;
 
 namespace TheWoodlandFamily
 {
@@ -38,6 +36,7 @@ namespace TheWoodlandFamily
             services.AddCors();
 
             services.AddMvc().AddFluentValidation();
+            services.AddTransient<PlayerJoiner, PlayerJoiner>();
             services.AddTransient<IValidator<Player>, PlayerValidator>();
             services.AddTransient<IValidator<Room>, RoomValidator>();
 

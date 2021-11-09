@@ -1,12 +1,10 @@
 ﻿using EFDataAccessLibrary.DataAccess;
-using EFDataAccessLibrary.Entities;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TheWoodlandFamily.InputModels;
-using TheWoodlandFamily.Models;
 using TheWoodlandFamily.OutputModels;
 using TheWoodlandFamily.Services;
 
@@ -34,17 +32,22 @@ namespace TheWoodlandFamily.Hubs
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
+            _playerSockets
+                .Remove(_playerSockets
+                .Where(connectionId => connectionId.Value == Context.ConnectionId)
+                .FirstOrDefault()
+                .Key);
             return base.OnDisconnectedAsync(exception);
         }
 
-        public async Task SendMessage(string player, string message)
+        public async Task SendMessage(string player, string message) 
         {
             await Clients.All.SendAsync("ReceiveMessage", player, message);
         }
 
         public async Task SendJoinedPlayer(RoomJoiningInputModel playerToJoin)
         {
-            PlayerOutputModel joinedPlayer = await _playerJoiner.JoinRoom(playerToJoin); //creates player entity in DB
+            PlayerOutputModel joinedPlayer = await _playerJoiner.JoinRoom(playerToJoin, _dbContext); //creates player entity in DB
             await Groups.AddToGroupAsync(Context.ConnectionId, playerToJoin.WordKey);
             _playerSockets.Add(joinedPlayer.PlayerId, Context.ConnectionId);
             await Clients.Client(Context.ConnectionId).SendAsync("JoinedPlayer", joinedPlayer);

@@ -1,10 +1,7 @@
 ﻿using EFDataAccessLibrary.DataAccess;
 using EFDataAccessLibrary.Entities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using TheWoodlandFamily.Controllers;
 
 namespace TheWoodlandFamily.Services
 {
@@ -32,18 +29,11 @@ namespace TheWoodlandFamily.Services
         {
             Room room = dbContext.Rooms.FirstOrDefault(room => room.WordKey.Equals(wordKey));
 
-            int[] playerIds = new int[TotalPlayerNumber];
-
-            for (int i = 0; i < TotalPlayerNumber; i++)
-            {
-                playerIds[i] = room.Players[i].Id;
-            }
-
             byte connectedPlayers = 0;
 
-            foreach (var player in playerSockets)
+            foreach (var playerId in room.Players)
             {
-                if (player.Key.Equals(playerIds))
+                if (playerSockets.Keys.Contains(playerId.Id))
                 {
                     connectedPlayers++;
                 }

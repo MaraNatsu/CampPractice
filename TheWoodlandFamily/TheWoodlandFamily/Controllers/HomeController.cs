@@ -43,17 +43,6 @@ namespace TheWoodlandFamily.Controllers
             };
             _dbContext.Rooms.Add(room);
 
-            //Player firstPlayer = new Player
-            //{
-            //    RoomId = room.Id,
-            //    Name = creatorData.PlayerName,
-            //    State = PlayerState.Waiting.ToString(),
-            //    Turn = 1,
-            //    HealthCount = 1,
-            //    Room = room
-            //};
-            //dbContext.Players.Add(firstPlayer);
-
             await _dbContext.SaveChangesAsync();
             RoomOutputModel roomViewModel = new RoomOutputModel(room);
 

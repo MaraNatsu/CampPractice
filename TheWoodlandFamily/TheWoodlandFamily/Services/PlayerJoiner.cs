@@ -10,17 +10,15 @@ using TheWoodlandFamily.Controllers;
 using TheWoodlandFamily.InputModels;
 using TheWoodlandFamily.OutputModels;
 
-namespace TheWoodlandFamily.Models
+namespace TheWoodlandFamily.Services
 {
     public class PlayerJoiner
     {
         private HomeController _controller;
 
-        public async Task<PlayerOutputModel> JoinRoom(RoomJoiningInputModel playerData)
+        public async Task<PlayerOutputModel> JoinRoom(RoomJoiningInputModel playerData, GameContext dbContext)
         {
-
-            Room room = _controller
-                ._dbContext
+            Room room = dbContext
                 .Rooms
                 .Include(room => room.Players)
                 .FirstOrDefault(room => room.WordKey.Equals(playerData.WordKey));
@@ -32,13 +30,13 @@ namespace TheWoodlandFamily.Models
 
             byte previousPlayerTurn;
 
-            if (_controller._dbContext.Players.Count() == 0)
+            if (room.Players.Count() == 0)
             {
                 previousPlayerTurn = 0;
             }
             else
             {
-                previousPlayerTurn = _controller._dbContext.Players.Max(player => player.Turn);
+                previousPlayerTurn = room.Players.Max(player => player.Turn);
             }
 
             Player player = new Player
@@ -47,11 +45,12 @@ namespace TheWoodlandFamily.Models
                 Name = playerData.PlayerName,
                 State = PlayerState.Waiting.ToString(),
                 Turn = (byte)(previousPlayerTurn + 1),
-                HealthCount = 1
+                HealthCount = 1,
+                Room = room
             };
-            _controller._dbContext.Players.Add(player);
+            room.Players.Add(player);
 
-            await _controller._dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
             PlayerOutputModel playerViewModel = new PlayerOutputModel(room, player);
 
             return playerViewModel;
