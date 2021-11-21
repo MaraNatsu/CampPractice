@@ -14,8 +14,6 @@ namespace TheWoodlandFamily.Services
 {
     public class PlayerJoiner
     {
-        private HomeController _controller;
-
         public async Task<PlayerOutputModel> JoinRoom(RoomJoiningInputModel playerData, GameContext dbContext)
         {
             Room room = dbContext

@@ -49,32 +49,45 @@ namespace TheWoodlandFamily.Controllers
             return roomViewModel;
         }
 
-        //[HttpPost("join-room")]
-        //public async Task<RoomOutputModel> JoinRoom([FromBody] RoomJoiningInputModel playerData)
-        //{
-        //    Room room = dbContext.Rooms.Include(room => room.Players).FirstOrDefault(room => room.WordKey.Equals(playerData.WordKey));
+        [HttpPost("create-player")]
+        public async Task<PlayerOutputModel> CreatePlayer([FromBody] RoomJoiningInputModel playerData)
+        {
+            Room room = _dbContext
+                .Rooms
+                .Include(room => room.Players)
+                .FirstOrDefault(room => room.WordKey.Equals(playerData.WordKey));
 
-        //    if (room == null)
-        //    {
-        //        return null;
-        //    }
+            if (room == null)
+            {
+                return null;
+            }
 
-        //    byte previousPlayerTurn = dbContext.Players.Max(player => player.Turn);
+            byte previousPlayerTurn;
 
-        //    Player player = new Player
-        //    {
-        //        RoomId = room.Id,
-        //        Name = playerData.PlayerName,
-        //        State = PlayerState.Waiting.ToString(),
-        //        Turn = (byte)(previousPlayerTurn + 1),
-        //        HealthCount = 1
-        //    };
-        //    dbContext.Players.Add(player);
+            if (room.Players.Count() == 0)
+            {
+                previousPlayerTurn = 0;
+            }
+            else
+            {
+                previousPlayerTurn = room.Players.Max(player => player.Turn);
+            }
 
-        //    await dbContext.SaveChangesAsync();
-        //    RoomOutputModel roomViewModel = new RoomOutputModel(room, player);
+            Player player = new Player
+            {
+                RoomId = room.Id,
+                Name = playerData.PlayerName,
+                State = PlayerState.Waiting.ToString(),
+                Turn = (byte)(previousPlayerTurn + 1),
+                HealthCount = 1,
+                Room = room
+            };
+            room.Players.Add(player);
 
-        //    return roomViewModel;
-        //}
+            await _dbContext.SaveChangesAsync();
+            PlayerOutputModel playerViewModel = new PlayerOutputModel(room, player);
+
+            return playerViewModel;
+        }
     }
 }

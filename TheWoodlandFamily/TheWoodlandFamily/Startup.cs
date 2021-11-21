@@ -36,11 +36,15 @@ namespace TheWoodlandFamily
             services.AddCors();
 
             services.AddMvc().AddFluentValidation();
-            services.AddTransient<PlayerJoiner, PlayerJoiner>();
+            services.AddTransient<PlayerJoiner>();
+            services.AddSingleton<WebSocketsHolder>();
             services.AddTransient<IValidator<Player>, PlayerValidator>();
             services.AddTransient<IValidator<Room>, RoomValidator>();
 
-            services.AddSignalR();
+            services.AddSignalR().AddHubOptions<GameHub>(options =>
+            {
+                options.EnableDetailedErrors = true;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -62,12 +66,10 @@ namespace TheWoodlandFamily
                 .SetIsOriginAllowed(origin => true) // allow any origin
                 .AllowCredentials()); // allow credentials
 
-            app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/chathub");
+                endpoints.MapHub<GameHub>("/gamehub");
             });
         }
     }

@@ -10,6 +10,7 @@ namespace TheWoodlandFamily.OutputModels
     {
         public int RoomId { get; set; }
         public int PlayerId { get; set; }
+        public string PlayerName { get; set; }
         public byte HealthCount { get; set; }
         public byte PlayerTurn { get; set; }
 
@@ -17,6 +18,7 @@ namespace TheWoodlandFamily.OutputModels
         {
             RoomId = room.Id;
             PlayerId = player.Id;
+            PlayerName = player.Name;
             HealthCount = player.HealthCount;
             PlayerTurn = player.Turn;
         }
