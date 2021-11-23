@@ -29,7 +29,7 @@ namespace TheWoodlandFamily.Controllers
         [HttpPost("create-room")]
         public async Task<RoomOutputModel> CreateRoom([FromBody] RoomCreationInputModel roomData)
         {
-            Room inspector = _dbContext.Rooms.FirstOrDefault(room => room.WordKey.Equals(roomData.WordKey));
+            Room inspector = _dbContext.Rooms.FirstOrDefault(room => room.WordKey.Equals(roomData.Wordkey));
 
             if (inspector != null)
             {
@@ -38,7 +38,7 @@ namespace TheWoodlandFamily.Controllers
 
             Room room = new Room
             {
-                WordKey = roomData.WordKey,
+                WordKey = roomData.Wordkey,
                 PlayerNumber = roomData.PlayerNumber
             };
             _dbContext.Rooms.Add(room);
@@ -76,10 +76,10 @@ namespace TheWoodlandFamily.Controllers
             Player player = new Player
             {
                 RoomId = room.Id,
-                Name = playerData.Name,
                 State = PlayerState.Waiting.ToString(),
-                Turn = (byte)(previousPlayerTurn + 1),
+                Name = playerData.Name,
                 HealthCount = 1,
+                Turn = (byte)(previousPlayerTurn + 1),
                 Room = room
             };
             room.Players.Add(player);

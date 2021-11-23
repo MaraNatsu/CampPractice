@@ -67,12 +67,16 @@ namespace TheWoodlandFamily.Hubs
             return base.OnDisconnectedAsync(exception);
         }
 
-        public async Task SendConnectedPlayer(RoomJoiningInputModel playerToConnect)
+        public async Task SendConnectedPlayer(PlayerConnectingInputModel playerToConnect)
         {
-            PlayerOutputModel connectedPlayer = new PlayerOutputModel(playerToConnect.Id, playerToConnect.Name);
+            PlayerOutputModel connectedPlayer = new PlayerOutputModel
+            {
+                Id = playerToConnect.Id,
+                PlayerName = playerToConnect.Name
+            };
 
             await Groups.AddToGroupAsync(Context.ConnectionId, playerToConnect.Wordkey);
-            await Clients.Group(playerToConnect.Wordkey).SendAsync("ConnectedPlayer", connectedPlayer);
+            await Clients.Group(playerToConnect.Wordkey).SendAsync("ShowConnectedPlayer", connectedPlayer);
 
             if (_checker.CheckIfAllPlayersConnected(playerToConnect.Wordkey, _dbContext, _holder.PlayerConnections))
             {

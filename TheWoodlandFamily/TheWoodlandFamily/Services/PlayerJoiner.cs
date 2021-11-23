@@ -49,7 +49,11 @@ namespace TheWoodlandFamily.Services
             room.Players.Add(player);
 
             await dbContext.SaveChangesAsync();
-            PlayerOutputModel playerViewModel = new PlayerOutputModel(room, player);
+            PlayerOutputModel playerViewModel = new PlayerOutputModel
+            {
+                Id = player.Id,
+                PlayerName = player.Name
+            };
 
             return playerViewModel;
         }

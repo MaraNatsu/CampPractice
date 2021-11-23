@@ -7,7 +7,6 @@ namespace TheWoodlandFamily.InputModels
 {
     public class RoomJoiningInputModel
     {
-        public int Id { get; set; }
         public string Name { get; set; }
         public string Wordkey { get; set; }
     }
