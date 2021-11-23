@@ -19,7 +19,7 @@ namespace TheWoodlandFamily.Services
             Room room = dbContext
                 .Rooms
                 .Include(room => room.Players)
-                .FirstOrDefault(room => room.WordKey.Equals(playerData.WordKey));
+                .FirstOrDefault(room => room.WordKey.Equals(playerData.Wordkey));
 
             if (room == null)
             {
@@ -40,7 +40,7 @@ namespace TheWoodlandFamily.Services
             Player player = new Player
             {
                 RoomId = room.Id,
-                Name = playerData.PlayerName,
+                Name = playerData.Name,
                 State = PlayerState.Waiting.ToString(),
                 Turn = (byte)(previousPlayerTurn + 1),
                 HealthCount = 1,

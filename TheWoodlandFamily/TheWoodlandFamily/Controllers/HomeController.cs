@@ -50,12 +50,12 @@ namespace TheWoodlandFamily.Controllers
         }
 
         [HttpPost("create-player")]
-        public async Task<PlayerOutputModel> CreatePlayer([FromBody] RoomJoiningInputModel playerData)
+        public async Task<ClientDataModel> CreatePlayer([FromBody] RoomJoiningInputModel playerData)
         {
             Room room = _dbContext
                 .Rooms
                 .Include(room => room.Players)
-                .FirstOrDefault(room => room.WordKey.Equals(playerData.WordKey));
+                .FirstOrDefault(room => room.WordKey.Equals(playerData.Wordkey));
 
             if (room == null)
             {
@@ -76,7 +76,7 @@ namespace TheWoodlandFamily.Controllers
             Player player = new Player
             {
                 RoomId = room.Id,
-                Name = playerData.PlayerName,
+                Name = playerData.Name,
                 State = PlayerState.Waiting.ToString(),
                 Turn = (byte)(previousPlayerTurn + 1),
                 HealthCount = 1,
@@ -85,9 +85,9 @@ namespace TheWoodlandFamily.Controllers
             room.Players.Add(player);
 
             await _dbContext.SaveChangesAsync();
-            PlayerOutputModel playerViewModel = new PlayerOutputModel(room, player);
+            ClientDataModel clientData = new ClientDataModel(room, player);
 
-            return playerViewModel;
+            return clientData;
         }
     }
 }

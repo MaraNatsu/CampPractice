@@ -32,9 +32,9 @@ namespace TheWoodlandFamily.Services
 
             byte connectedPlayers = 0;
 
-            foreach (var playerId in room.Players)
+            foreach (var player in room.Players)
             {
-                if (playerSockets.Keys.Contains(playerId.Id))
+                if (playerSockets.Keys.Contains(player.Id))
                 {
                     connectedPlayers++;
                 }
