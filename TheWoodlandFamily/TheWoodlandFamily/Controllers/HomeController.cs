@@ -82,6 +82,7 @@ namespace TheWoodlandFamily.Controllers
                 Turn = (byte)(previousPlayerTurn + 1),
                 Room = room
             };
+
             room.Players.Add(player);
 
             await _dbContext.SaveChangesAsync();

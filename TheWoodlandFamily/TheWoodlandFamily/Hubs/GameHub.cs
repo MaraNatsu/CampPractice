@@ -1,6 +1,8 @@
 ﻿using EFDataAccessLibrary.DataAccess;
+using EFDataAccessLibrary.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +50,6 @@ namespace TheWoodlandFamily.Hubs
 
             HttpContext playerToken = Context.GetHttpContext();
             int playerId = Convert.ToInt32(playerToken.Request.Query["playerId"]);
-
             int roomId = _dbContext
                 .Players
                 .Where(player => player.Id == playerId)
@@ -67,16 +68,28 @@ namespace TheWoodlandFamily.Hubs
             return base.OnDisconnectedAsync(exception);
         }
 
-        public async Task SendConnectedPlayer(PlayerConnectingInputModel playerToConnect)
+        public async Task SendConnectedPlayers(PlayerConnectingInputModel playerToConnect)
         {
-            PlayerOutputModel connectedPlayer = new PlayerOutputModel
+            List<PlayerOutputModel> connectedPlayers = new List<PlayerOutputModel>();
+            Room room = _dbContext
+                .Rooms
+                .Include(room => room.Players)
+                .FirstOrDefault(room => room.WordKey.Equals(playerToConnect.Wordkey));
+
+            foreach (var player in room.Players)
             {
-                Id = playerToConnect.Id,
-                PlayerName = playerToConnect.Name
-            };
+                if (_holder.PlayerConnections.Keys.Contains(player.Id))
+                {
+                    connectedPlayers.Add(new PlayerOutputModel
+                    {
+                        Id = player.Id,
+                        PlayerName = player.Name 
+                    });
+                }
+            }
 
             await Groups.AddToGroupAsync(Context.ConnectionId, playerToConnect.Wordkey);
-            await Clients.Group(playerToConnect.Wordkey).SendAsync("ShowConnectedPlayer", connectedPlayer);
+            await Clients.Group(playerToConnect.Wordkey).SendAsync("ShowConnectedPlayers", connectedPlayers);
 
             if (_checker.CheckIfAllPlayersConnected(playerToConnect.Wordkey, _dbContext, _holder.PlayerConnections))
             {
