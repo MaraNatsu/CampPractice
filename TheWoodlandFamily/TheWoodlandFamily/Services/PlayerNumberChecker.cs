@@ -1,8 +1,10 @@
 ﻿using EFDataAccessLibrary.DataAccess;
 using EFDataAccessLibrary.Entities;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using TheWoodlandFamily.Models;
 
 namespace TheWoodlandFamily.Services
 {
@@ -12,34 +14,25 @@ namespace TheWoodlandFamily.Services
         public byte JoinedPlayerNumber { get; private set; }
 
 
-        public bool CheckIfAllPlayersConnected(string wordKey, GameContext dbContext, Dictionary<int, string> playerSockets)
+        public bool CheckIfAllPlayersConnected(Room room, List<ConnectionDataModel> playerSockets)
         {
-            TotalPlayerNumber = DefineTotalPlayerNumber(dbContext, wordKey);
-            JoinedPlayerNumber = DefineConnectedPlayers(dbContext, wordKey, playerSockets);
+            TotalPlayerNumber = room.PlayerNumber;
+            JoinedPlayerNumber = DefineConnectedPlayers(room, playerSockets);
 
             return TotalPlayerNumber == JoinedPlayerNumber;
         }
 
-        private byte DefineTotalPlayerNumber(GameContext dbContext, string wordKey)
+        private byte DefineConnectedPlayers(Room room, List<ConnectionDataModel> playerSockets)
         {
-            Room room = dbContext.Rooms.FirstOrDefault(room => room.WordKey.Equals(wordKey));
-            return room.PlayerNumber;
-        }
-
-        private byte DefineConnectedPlayers(GameContext dbContext, string wordKey, Dictionary<int, string> playerSockets)
-        {
-            Room room = dbContext.Rooms.FirstOrDefault(room => room.WordKey.Equals(wordKey));
-
             byte connectedPlayers = 0;
 
             foreach (var player in room.Players)
             {
-                if (playerSockets.Keys.Contains(player.Id))
+                if (playerSockets.Select(socket => socket.PlayerId).ToList().Contains(player.Id))
                 {
                     connectedPlayers++;
                 }
             }
-
             return connectedPlayers;
         }
     }

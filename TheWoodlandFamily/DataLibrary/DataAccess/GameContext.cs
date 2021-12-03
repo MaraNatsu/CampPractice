@@ -11,8 +11,7 @@ namespace EFDataAccessLibrary.DataAccess
         public GameContext(DbContextOptions options) : base(options) { }
         public DbSet<Player> Players { get; set; }
         public DbSet<Room> Rooms { get; set; }
-        public DbSet<Card> Deck { get; set; }
-
+        public DbSet<Card> Cards { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

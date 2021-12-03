@@ -41,7 +41,10 @@ namespace TheWoodlandFamily.Controllers
                 WordKey = roomData.Wordkey,
                 PlayerNumber = roomData.PlayerNumber
             };
+           
             _dbContext.Rooms.Add(room);
+
+            GenerateDeck(room);         
 
             await _dbContext.SaveChangesAsync();
             RoomOutputModel roomViewModel = new RoomOutputModel(room);
@@ -89,6 +92,58 @@ namespace TheWoodlandFamily.Controllers
             ClientDataModel clientData = new ClientDataModel(room, player);
 
             return clientData;
+        }
+
+        private void GenerateDeck(Room room)
+        {
+            byte lifeCardNumber = 4;
+            byte simpleCardNumber = 20;
+            byte trapCardNumber = (byte)(room.PlayerNumber - 1);
+            byte cardNumber = (byte)(lifeCardNumber + simpleCardNumber + trapCardNumber);
+
+            List<Card> deck = new List<Card>();
+            Random random = new Random();
+
+            FillDeckWIthType(deck, lifeCardNumber, CardType.Life);
+            FillDeckWIthType(deck, simpleCardNumber, CardType.Simple);
+            FillDeckWIthType(deck, trapCardNumber, CardType.Trap);
+
+            for (int i = deck.Count - 1; i >= 1; i--)
+            {
+                int j = random.Next(i + 1);
+
+                var temp = deck[j];
+                deck[j] = deck[i];
+                deck[i] = temp;
+            }
+
+            byte turn = 1;
+
+            foreach (var card in deck)
+            {
+                card.RoomId = room.Id;
+                card.Order = turn;
+                card.Room = room;
+
+                _dbContext.Cards.Add(card);
+                room.Deck.Add(card);
+                turn++;
+            }
+        }
+
+        private void FillDeckWIthType(List<Card> deck, int cardNumber, CardType type)
+        {
+            int i = 0;
+
+            while (i < cardNumber)
+            {
+                deck.Add(new Card
+                {
+                    Type = type.ToString()
+                });
+
+                i++;
+            }
         }
     }
 }

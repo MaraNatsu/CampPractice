@@ -9,13 +9,15 @@ namespace EFDataAccessLibrary.Entities
     {
         public int Id { get; set; }
 
-        [Required]
-        public int DeckId { get; set; }
+        public int RoomId { get; set; }
 
         [Required]
         public byte Order { get; set; }
 
         [Required]
         public string Type { get; set; }
+
+        [Required]
+        public Room Room { get; set; }
     }
 }
