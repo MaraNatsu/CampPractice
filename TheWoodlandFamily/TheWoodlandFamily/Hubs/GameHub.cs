@@ -1,4 +1,5 @@
-﻿using EFDataAccessLibrary.DataAccess;
+﻿using EFDataAccessLibrary;
+using EFDataAccessLibrary.DataAccess;
 using EFDataAccessLibrary.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
@@ -21,11 +22,13 @@ namespace TheWoodlandFamily.Hubs
 
         private PlayerNumberChecker _checker = new PlayerNumberChecker();
         private WebSocketsHolder _holder;
+        private GameProcessor _processor;
 
-        public GameHub(GameContext context, WebSocketsHolder holder)
+        public GameHub(GameContext context, WebSocketsHolder holder, GameProcessor processor)
         {
             _dbContext = context;
             _holder = holder;
+            _processor = processor;
         }
 
         public override async Task OnConnectedAsync()
@@ -52,7 +55,11 @@ namespace TheWoodlandFamily.Hubs
 
             if (_checker.CheckIfAllPlayersConnected(room, _holder.PlayerConnections[roomId]))
             {
-                await Clients.Group(room.WordKey).SendAsync("StartGame");
+                Player firstPlayer = room.Players.FirstOrDefault(player => player.Turn == 1);
+                firstPlayer.State = PlayerState.Active.ToString();
+                _dbContext.SaveChanges();
+
+                await Clients.Group(room.WordKey).SendAsync("StartGame", firstPlayer.Id);
             }
         }
 
@@ -63,15 +70,16 @@ namespace TheWoodlandFamily.Hubs
 
             foreach (var connection in connections)
             {
-                string playerName = room
+                Player player = room
                     .Players
-                    .FirstOrDefault(player => player.Id == connection.PlayerId)
-                    .Name;
+                    .FirstOrDefault(player => player.Id == connection.PlayerId);
 
                 connectedPlayers.Add(new PlayerOutputModel
                 {
                     Id = connection.PlayerId,
-                    PlayerName = playerName
+                    PlayerName = player.Name,
+                    Turn = player.Turn,
+                    HealthCount = player.HealthCount
                 });
             }
 
@@ -101,6 +109,41 @@ namespace TheWoodlandFamily.Hubs
             _holder.RemoveConnection(roomId, playerId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomWordKey);
             await Clients.Group(roomWordKey).SendAsync("RemoveDisconnectedPlayer", playerId);
+        }
+
+        public async Task ProcessMove(int playerId, string wordkey)
+        {
+            Room room = _dbContext
+                .Rooms
+                .Include(room => room.Players)
+                .Include(room => room.Deck)
+                .FirstOrDefault(room => room.WordKey == wordkey);
+
+            string cardType = _processor.DefineCardType(_dbContext, room);
+            await Clients.Client(Context.ConnectionId).SendAsync("ShowCardTaken", cardType);
+
+            PlayerOutputModel updatedPlayer = _processor.UpdatePlayerStatus(_dbContext, room, playerId, cardType);
+            await Clients.Group(wordkey).SendAsync("UpdatePlayerData", updatedPlayer);
+
+            int activePlayersNumber = _processor.CheckActivePlayersNumber(room);
+
+            if (activePlayersNumber > 1)
+            {
+
+            Player nextPlayer = _processor.PassMove(_dbContext, room, playerId);
+
+                string connectionId = _holder
+                    .PlayerConnections[room.Id]
+                    .FirstOrDefault(player => player.PlayerId == nextPlayer.Id)
+                    .ConnectionId;
+
+                await Clients.Client(connectionId).SendAsync("MakeMove", nextPlayer.Id);
+            }
+            else
+            {
+                PlayerOutputModel winner = _processor.DefineWinner(room);
+                await Clients.Group(wordkey).SendAsync("FinishGame", winner.Id);
+            }
         }
 
         //public async Task SendConnectedPlayer(PlayerConnectingInputModel playerToConnect)

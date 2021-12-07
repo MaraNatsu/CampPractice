@@ -52,7 +52,8 @@ namespace TheWoodlandFamily.Services
             PlayerOutputModel playerViewModel = new PlayerOutputModel
             {
                 Id = player.Id,
-                PlayerName = player.Name
+                PlayerName = player.Name,
+                Turn = player.Turn
             };
 
             return playerViewModel;

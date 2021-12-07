@@ -10,5 +10,7 @@ namespace TheWoodlandFamily.OutputModels
     {
         public int Id { get; set; }
         public string PlayerName { get; set; }
+        public byte Turn { get; set; }
+        public byte HealthCount { get; set; }
     }
 }

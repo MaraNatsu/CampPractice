@@ -3,14 +3,11 @@ using EFDataAccessLibrary.DataAccess;
 using EFDataAccessLibrary.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using TheWoodlandFamily.InputModels;
-using TheWoodlandFamily.Models;
 using TheWoodlandFamily.OutputModels;
 
 namespace TheWoodlandFamily.Controllers
@@ -47,13 +44,18 @@ namespace TheWoodlandFamily.Controllers
             GenerateDeck(room);         
 
             await _dbContext.SaveChangesAsync();
-            RoomOutputModel roomViewModel = new RoomOutputModel(room);
+            RoomOutputModel roomViewModel = new RoomOutputModel
+            {
+                RoomId = room.Id,
+                PlayerNumber = room.PlayerNumber,
+                Wordkey = room.WordKey
+            };
 
             return roomViewModel;
         }
 
         [HttpPost("create-player")]
-        public async Task<ClientDataModel> CreatePlayer([FromBody] RoomJoiningInputModel playerData)
+        public async Task<PlayerOutputModel> CreatePlayer([FromBody] RoomJoiningInputModel playerData)
         {
             Room room = _dbContext
                 .Rooms
@@ -89,9 +91,16 @@ namespace TheWoodlandFamily.Controllers
             room.Players.Add(player);
 
             await _dbContext.SaveChangesAsync();
-            ClientDataModel clientData = new ClientDataModel(room, player);
+            PlayerOutputModel playerViewModel = new PlayerOutputModel
+            {
+                Id = player.Id,
+                PlayerName = player.Name,
+                Turn = player.Turn,
+                HealthCount = player.HealthCount
+            };
+            //ClientDataModel clientData = new ClientDataModel(room, player);
 
-            return clientData;
+            return playerViewModel;
         }
 
         private void GenerateDeck(Room room)
