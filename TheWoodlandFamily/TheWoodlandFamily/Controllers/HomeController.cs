@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TheWoodlandFamily.InputModels;
+using TheWoodlandFamily.Models;
 using TheWoodlandFamily.OutputModels;
 
 namespace TheWoodlandFamily.Controllers
@@ -38,10 +39,10 @@ namespace TheWoodlandFamily.Controllers
                 WordKey = roomData.Wordkey,
                 PlayerNumber = roomData.PlayerNumber
             };
-           
+
             _dbContext.Rooms.Add(room);
 
-            GenerateDeck(room);         
+            GenerateDeck(room);
 
             await _dbContext.SaveChangesAsync();
             RoomOutputModel roomViewModel = new RoomOutputModel
@@ -55,7 +56,7 @@ namespace TheWoodlandFamily.Controllers
         }
 
         [HttpPost("create-player")]
-        public async Task<PlayerOutputModel> CreatePlayer([FromBody] RoomJoiningInputModel playerData)
+        public async Task<ClientDataModel> CreatePlayer([FromBody] RoomJoiningInputModel playerData)
         {
             Room room = _dbContext
                 .Rooms
@@ -98,9 +99,26 @@ namespace TheWoodlandFamily.Controllers
                 Turn = player.Turn,
                 HealthCount = player.HealthCount
             };
-            //ClientDataModel clientData = new ClientDataModel(room, player);
+            ClientDataModel clientData = new ClientDataModel(room, player);
 
-            return playerViewModel;
+            return clientData;
+        }
+
+        [HttpPost("remove-player")]
+        public async Task RemovePlayer([FromBody] RoomJoiningInputModel playerData)
+        {
+            Room room = _dbContext
+                .Rooms
+                .Include(room => room.Players)
+                .FirstOrDefault(room => room.WordKey.Equals(playerData.Wordkey));
+
+            Player playerToRemove = room.Players.FirstOrDefault(player => player.Name == playerData.Name);
+
+            if (playerToRemove != null)
+            {
+                _dbContext.Players.Remove(playerToRemove);
+                _dbContext.SaveChanges();
+            }
         }
 
         private void GenerateDeck(Room room)

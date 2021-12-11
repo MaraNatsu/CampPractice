@@ -13,8 +13,9 @@ namespace TheWoodlandFamily.Services
         public void AddConnection(int roomId, int playerId, string connectionId)
         {
             List<ConnectionDataModel> connections;
+            int activeRoomId = PlayerConnections.Keys.FirstOrDefault(id => id == roomId);
 
-            if (PlayerConnections.Keys.Contains(roomId))
+            if (activeRoomId != 0)
             {
                 connections = PlayerConnections[roomId];
                 connections.Add(new ConnectionDataModel(playerId, connectionId));
@@ -28,7 +29,9 @@ namespace TheWoodlandFamily.Services
 
         public void RemoveConnection(int roomId, int playerId)
         {
-            if (!PlayerConnections.Keys.Contains(roomId))
+            int activeRoomId = PlayerConnections.Keys.FirstOrDefault(id => id == roomId);
+
+            if (activeRoomId == 0)
             {
                 return;
             }

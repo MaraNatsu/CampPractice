@@ -97,16 +97,15 @@ namespace TheWoodlandFamily.Hubs
 
             int roomId = _dbContext
                 .Players
-                .Where(player => player.Id == playerId)
-                .FirstOrDefault()
+                .FirstOrDefault(player => player.Id == playerId)
                 .RoomId;
             string roomWordKey = _dbContext
                 .Rooms
                 .Where(room => room.Id == roomId)
                 .FirstOrDefault()
                 .WordKey;
-
             _holder.RemoveConnection(roomId, playerId);
+
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomWordKey);
             await Clients.Group(roomWordKey).SendAsync("RemoveDisconnectedPlayer", playerId);
         }
@@ -130,7 +129,7 @@ namespace TheWoodlandFamily.Hubs
             if (activePlayersNumber > 1)
             {
 
-            Player nextPlayer = _processor.PassMove(_dbContext, room, playerId);
+                Player nextPlayer = _processor.PassMove(_dbContext, room, playerId);
 
                 string connectionId = _holder
                     .PlayerConnections[room.Id]

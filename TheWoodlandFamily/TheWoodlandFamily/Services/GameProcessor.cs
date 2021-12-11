@@ -78,6 +78,11 @@ namespace TheWoodlandFamily.Services
             Player nextPlayer = room
                 .Players.FirstOrDefault(player => player.Turn > previousPlayer.Turn && player.State != PlayerState.Observing.ToString());
 
+            if (previousPlayer.HealthCount >= 0)
+            {
+                previousPlayer.State = PlayerState.Waiting.ToString();
+            }
+
             if (nextPlayer.State != null)
             {
                 nextPlayer.State = PlayerState.Active.ToString();
