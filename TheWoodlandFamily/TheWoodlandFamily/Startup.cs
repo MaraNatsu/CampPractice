@@ -36,9 +36,8 @@ namespace TheWoodlandFamily
             services.AddCors();
 
             services.AddMvc().AddFluentValidation();
-            services.AddTransient<PlayerJoiner>();
-            services.AddTransient<GameProcessor>();
 
+            services.AddTransient<GameProcessor>();
             services.AddSingleton<WebSocketsHolder>();
 
             services.AddTransient<IValidator<Player>, PlayerValidator>();

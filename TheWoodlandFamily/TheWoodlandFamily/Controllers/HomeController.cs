@@ -104,27 +104,10 @@ namespace TheWoodlandFamily.Controllers
             return clientData;
         }
 
-        [HttpPost("remove-player")]
-        public async Task RemovePlayer([FromBody] RoomJoiningInputModel playerData)
-        {
-            Room room = _dbContext
-                .Rooms
-                .Include(room => room.Players)
-                .FirstOrDefault(room => room.WordKey.Equals(playerData.Wordkey));
-
-            Player playerToRemove = room.Players.FirstOrDefault(player => player.Name == playerData.Name);
-
-            if (playerToRemove != null)
-            {
-                _dbContext.Players.Remove(playerToRemove);
-                _dbContext.SaveChanges();
-            }
-        }
-
         private void GenerateDeck(Room room)
         {
             byte lifeCardNumber = 4;
-            byte simpleCardNumber = 20;
+            byte simpleCardNumber = 10;
             byte trapCardNumber = (byte)(room.PlayerNumber - 1);
             byte cardNumber = (byte)(lifeCardNumber + simpleCardNumber + trapCardNumber);
 

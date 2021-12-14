@@ -7,9 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.WebSockets;
 using System.Threading.Tasks;
-using TheWoodlandFamily.InputModels;
 using TheWoodlandFamily.Models;
 using TheWoodlandFamily.OutputModels;
 using TheWoodlandFamily.Services;
@@ -50,16 +48,21 @@ namespace TheWoodlandFamily.Hubs
 
             _holder.AddConnection(roomId, playerId, Context.ConnectionId);
             await Groups.AddToGroupAsync(Context.ConnectionId, room.WordKey);
-
             await SendAllActiveConnectionsAsync(room);
 
-            if (_checker.CheckIfAllPlayersConnected(room, _holder.PlayerConnections[roomId]))
+            if (_checker.CheckIfAllPlayersConnected(room, _holder.PlayerConnections[room.Id]))
             {
                 Player firstPlayer = room.Players.FirstOrDefault(player => player.Turn == 1);
+                string connectionId = _holder
+                    .PlayerConnections[room.Id]
+                    .First(player => player.PlayerId == firstPlayer.Id)
+                    .ConnectionId;
+
                 firstPlayer.State = PlayerState.Active.ToString();
                 _dbContext.SaveChanges();
 
                 await Clients.Group(room.WordKey).SendAsync("StartGame", firstPlayer.Id);
+                await AllowMove(connectionId);
             }
         }
 
@@ -86,28 +89,9 @@ namespace TheWoodlandFamily.Hubs
             await Clients.Group(room.WordKey).SendAsync("GetConnectedPlayers", connectedPlayers);
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public async Task AllowMove(string connectionId)
         {
-            await base.OnDisconnectedAsync(exception);
-
-            HttpContext playerToken = Context.GetHttpContext();
-            int playerId = Convert.ToInt32(playerToken.Request.Query["playerId"]);
-
-            Console.WriteLine("Disconnected: " + playerId + " - " + Context.ConnectionId);
-
-            int roomId = _dbContext
-                .Players
-                .FirstOrDefault(player => player.Id == playerId)
-                .RoomId;
-            string roomWordKey = _dbContext
-                .Rooms
-                .Where(room => room.Id == roomId)
-                .FirstOrDefault()
-                .WordKey;
-            _holder.RemoveConnection(roomId, playerId);
-
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomWordKey);
-            await Clients.Group(roomWordKey).SendAsync("RemoveDisconnectedPlayer", playerId);
+            await Clients.Client(connectionId).SendAsync("SetPlayerToMove");
         }
 
         public async Task ProcessMove(int playerId, string wordkey)
@@ -121,8 +105,8 @@ namespace TheWoodlandFamily.Hubs
             string cardType = _processor.DefineCardType(_dbContext, room);
             await Clients.Client(Context.ConnectionId).SendAsync("ShowCardTaken", cardType);
 
-            PlayerOutputModel updatedPlayer = _processor.UpdatePlayerStatus(_dbContext, room, playerId, cardType);
-            await Clients.Group(wordkey).SendAsync("UpdatePlayerData", updatedPlayer);
+            PlayerOutputModel movedPlayer = _processor.UpdatePlayerStatus(_dbContext, room, playerId, cardType);
+            await Clients.Client(Context.ConnectionId).SendAsync("UpdatePlayerData", movedPlayer);
 
             int activePlayersNumber = _processor.CheckActivePlayersNumber(room);
 
@@ -136,7 +120,7 @@ namespace TheWoodlandFamily.Hubs
                     .FirstOrDefault(player => player.PlayerId == nextPlayer.Id)
                     .ConnectionId;
 
-                await Clients.Client(connectionId).SendAsync("MakeMove", nextPlayer.Id);
+                await AllowMove(connectionId);
             }
             else
             {
@@ -145,21 +129,33 @@ namespace TheWoodlandFamily.Hubs
             }
         }
 
-        //public async Task SendConnectedPlayer(PlayerConnectingInputModel playerToConnect)
-        //{
-        //    PlayerOutputModel connectedPayer = new PlayerOutputModel
-        //    {
-        //        Id = playerToConnect.Id,
-        //        PlayerName = playerToConnect.Name
-        //    };
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            await base.OnDisconnectedAsync(exception);
 
-        //    await Groups.AddToGroupAsync(Context.ConnectionId, playerToConnect.Wordkey);
-        //    await Clients.Group(playerToConnect.Wordkey).SendAsync("AddConnectedPlayer", connectedPayer);
+            HttpContext playerToken = Context.GetHttpContext();
+            int playerId = Convert.ToInt32(playerToken.Request.Query["playerId"]);
 
-        //    if (_checker.CheckIfAllPlayersConnected(playerToConnect.Wordkey, _dbContext, _holder.PlayerConnections))
-        //    {
-        //        await Clients.Group(playerToConnect.Wordkey).SendAsync("StartGame");
-        //    }
-        //}
+            Console.WriteLine("Disconnected: " + playerId + " - " + Context.ConnectionId);
+
+            Room room = _dbContext
+                .Players
+                .Include(player => player.Room)
+                .FirstOrDefault(player => player.Id == playerId)
+                .Room;
+
+            _holder.RemoveConnection(room.Id, playerId);
+
+            Player playerToRemove = room.Players.FirstOrDefault(player => player.Id == playerId);
+
+            if (playerToRemove != null)
+            {
+                _dbContext.Players.Remove(playerToRemove);
+                _dbContext.SaveChanges();
+            }
+
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, room.WordKey);
+            await Clients.Group(room.WordKey).SendAsync("RemoveDisconnectedPlayer", playerId);
+        }
     }
 }

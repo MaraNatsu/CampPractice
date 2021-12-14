@@ -1,12 +1,8 @@
 ﻿using EFDataAccessLibrary;
 using EFDataAccessLibrary.DataAccess;
 using EFDataAccessLibrary.Entities;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using TheWoodlandFamily.Models;
 using TheWoodlandFamily.OutputModels;
 
 namespace TheWoodlandFamily.Services
@@ -16,8 +12,9 @@ namespace TheWoodlandFamily.Services
         public string DefineCardType(GameContext dbContext, Room room)
         {
             Card cardTaken = room.Deck[0];
-            string cardType = cardTaken.Type;
-            room.Deck.Remove(cardTaken);
+            string cardType = cardTaken.Type.ToString();
+            room.Deck.RemoveAt(0);
+            dbContext.SaveChanges();
 
             return cardType;
         }
@@ -35,11 +32,25 @@ namespace TheWoodlandFamily.Services
                     playerToUpdate.HealthCount += 1;
                     break;
                 case nameof(CardType.Trap):
-                    playerToUpdate.HealthCount -= 1;
+                    if (playerToUpdate.HealthCount > 0)
+                    {
+                        playerToUpdate.HealthCount -= 1;
 
-                    if (playerToUpdate.HealthCount < 0)
+                        Random random = new Random();
+                        int index = random.Next(0, room.Deck.Count);
+
+                        room.Deck.Insert(index, new Card()
+                        {
+                            RoomId = room.Id,
+                            Order = (byte)(index + 1),
+                            Type = CardType.Trap.ToString(),
+                            Room = room
+                        });
+                    }
+                    else
                     {
                         playerToUpdate.State = PlayerState.Observing.ToString();
+
                     }
                     break;
             }
@@ -63,7 +74,7 @@ namespace TheWoodlandFamily.Services
 
             foreach (var player in room.Players)
             {
-                if (player.State == PlayerState.Active.ToString())
+                if (player.State != PlayerState.Observing.ToString())
                 {
                     i++;
                 }
@@ -76,18 +87,17 @@ namespace TheWoodlandFamily.Services
         {
             Player previousPlayer = room.Players.First(player => player.Id == previousPlayerId);
             Player nextPlayer = room
-                .Players.FirstOrDefault(player => player.Turn > previousPlayer.Turn && player.State != PlayerState.Observing.ToString());
+                .Players
+                .FirstOrDefault(player => player.Turn > previousPlayer.Turn && player.State != PlayerState.Observing.ToString());
 
-            if (previousPlayer.HealthCount >= 0)
+            if (nextPlayer == null)
             {
-                previousPlayer.State = PlayerState.Waiting.ToString();
+                nextPlayer = room
+                    .Players
+                    .First(player => player.Turn < previousPlayer.Turn && player.State != PlayerState.Observing.ToString());
             }
 
-            if (nextPlayer.State != null)
-            {
-                nextPlayer.State = PlayerState.Active.ToString();
-            }
-
+            nextPlayer.State = PlayerState.Active.ToString();
             dbContext.SaveChanges();
 
             return nextPlayer;
@@ -95,13 +105,13 @@ namespace TheWoodlandFamily.Services
 
         public PlayerOutputModel DefineWinner(Room room)
         {
-            Player activePlayer = room.Players.First(player => player.State == PlayerState.Active.ToString());
+            Player lastPlayer = room.Players.First(player => player.State != PlayerState.Observing.ToString());
             PlayerOutputModel winner = new PlayerOutputModel
             {
-                Id = activePlayer.Id,
-                PlayerName = activePlayer.Name,
-                Turn = activePlayer.Turn,
-                HealthCount = activePlayer.HealthCount
+                Id = lastPlayer.Id,
+                PlayerName = lastPlayer.Name,
+                Turn = lastPlayer.Turn,
+                HealthCount = lastPlayer.HealthCount
             };
 
             return winner;
