@@ -36,7 +36,6 @@ namespace TheWoodlandFamily
             services.AddCors();
 
             services.AddMvc().AddFluentValidation();
-            services.AddTransient<PlayerJoiner>();
             services.AddTransient<GameProcessor>();
             services.AddSingleton<WebSocketsHolder>();
             services.AddTransient<IValidator<Player>, PlayerValidator>();
@@ -57,7 +56,6 @@ namespace TheWoodlandFamily
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
 
             // global cors policy
@@ -66,6 +64,7 @@ namespace TheWoodlandFamily
                 .AllowAnyHeader()
                 .SetIsOriginAllowed(origin => true) // allow any origin
                 .AllowCredentials()); // allow credentials
+
 
             app.UseEndpoints(endpoints =>
             {
